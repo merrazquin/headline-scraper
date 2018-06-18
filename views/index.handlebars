@@ -9,7 +9,7 @@
                 </div>
                 <div class="card-content">
                     <span class="card-title activator grey-text text-darken-4">{{title}}<i class="material-icons right">more_vert</i></span>
-                    <p><a href="{{../base}}{{URL}}" target="_blank"><i class="material-icons">link</i></a></p>
+                    <p><a href="{{../base}}{{URL}}" target="_blank" title="view comic"><i class="material-icons">link</i></a></p>
                 </div>
                 <div class="card-reveal">
                     <span class="card-title grey-text text-darken-4">{{title}}<i class="material-icons right">close</i></span>
@@ -18,11 +18,11 @@
                             {{>comment this}}
                         {{/each}}
                     </div>
-                    <form class="commentForm hide">
+                    <form class="commentForm {{#if comments.length}}hide{{/if}}">
                         <input type="text" data-id="{{_id}}" id="commentText" placeholder="comment (and press ENTER)">
                     </form>
                     <div class="stickyButton right-align">
-                        <a class="btn-floating btn-small red waves-effect waves-light addComment">
+                        <a class="btn-floating btn-small red waves-effect waves-light addComment" title="add a comment">
                             <i class="small material-icons right">add</i>
                         </a>
                     </div>
