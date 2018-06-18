@@ -27,6 +27,10 @@ var
             trim: true
         },
 
+        imgCaption: {
+            type: String
+        },
+
         comments: {
             type: [commentSchema]
         }

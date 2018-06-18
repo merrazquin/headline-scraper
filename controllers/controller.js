@@ -36,7 +36,8 @@ router.get('/', (req, res) => {
 
                     let title = $(element).text(),
                         URL = $(element).attr('href'),
-                        imgURL = ''
+                        imgURL = '',
+                        imgCaption = ''
 
                     Headline.findOne({ URL: URL }, (err, article) => {
                         if (article) {
@@ -57,9 +58,10 @@ router.get('/', (req, res) => {
 
                                 if ($('#comic img').length) {
                                     imgURL = 'https:' + $('#comic img')[0].attribs.src
+                                    imgCaption = $('#comic img')[0].attribs.title
                                 }
 
-                                Headline.create({ URL: URL, title: title, imgURL: imgURL }, (error, result) => {
+                                Headline.create({ URL: URL, title: title, imgURL: imgURL, imgCaption: imgCaption }, (error, result) => {
                                     if (error) {
                                         return console.error(error)
                                     }
