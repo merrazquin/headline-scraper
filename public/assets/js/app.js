@@ -24,7 +24,6 @@ $(function () {
 
         $.ajax({
             url: '/comment/' + id, type: 'DELETE', success: function (result) {
-                console.log('hi', result)
                 $('#' + result).fadeOut()
             }
         });

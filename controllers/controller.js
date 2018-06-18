@@ -38,44 +38,45 @@ router.get('/', (req, res) => {
                         URL = $(element).attr('href'),
                         imgURL = ''
 
-                    // TODO: only update URL if not found...
-                    request(BASE_URL + URL, (err, response, html) => {
-                        if (err) {
-                            return res.render('error', { error: err.toString() })
-                        }
+                    Headline.findOne({ URL: URL }, (err, article) => {
+                        if (article) {
+                            // don't create a new one if it already exists
+                            totalResults--
 
-                        let $ = cheerio.load(html)
-
-                        if ($('#comic img').length) {
-                            imgURL = 'https:' + $('#comic img')[0].attribs.src
-                        }
-
-                        Headline.findOneAndUpdate(
-                            { URL: URL }, // URL should be unique, so search by that
-                            { $set: { title: title, imgURL: imgURL } }, // update the title if necessary
-                            { upsert: true, new: true, setDefaultsOnInsert: true }, // upsert - insert or update depending on existence
-                            (error, result) => {
-                                if (error) {
-                                    return console.error(error)
+                            if (!totalResults) {
+                                return findAll(res)
+                            }
+                        } else {
+                            // otherwise, pull the image URL, and create a new one
+                            request(BASE_URL + URL, (err, response, html) => {
+                                if (err) {
+                                    return res.render('error', { error: err.toString() })
                                 }
-                                results.push(result)
 
-                                // if all results have been pushed, we can send them to the client
-                                if(results.length == totalResults) {
-                                    res.render('index', {base: BASE_URL, headlines: results})
+                                let $ = cheerio.load(html)
+
+                                if ($('#comic img').length) {
+                                    imgURL = 'https:' + $('#comic img')[0].attribs.src
                                 }
+
+                                Headline.create({ URL: URL, title: title, imgURL: imgURL }, (error, result) => {
+                                    if (error) {
+                                        return console.error(error)
+                                    }
+                                    totalResults--
+                                    // if all results have been pushed, we can send them to the client
+                                    if (!totalResults) {
+                                        findAll(res)
+                                    }
+                                })
                             })
+                        }
                     })
+
                 })
             } else {
                 // no new data, pull existing items from DB
-                Headline.find({}, null, { sort: '_id' }, (err, headlines) => {
-                    if (err) {
-                        return res.render('error', { error: err })
-                    }
-
-                    res.render('index', { base: BASE_URL, headlines: headlines })
-                })
+                findAll(res)
             }
         })
     })
@@ -96,6 +97,16 @@ router.delete('/comment/:id', (req, res) => {
         res.json(req.params.id)
     })
 })
+
+function findAll(res) {
+    Headline.find({}, null, { sort: '_id' }, (err, headlines) => {
+        if (err) {
+            return res.render('error', { error: err })
+        }
+
+        res.render('index', { base: BASE_URL, headlines: headlines })
+    })
+}
 
 // Export routes for server.js to use.
 module.exports = router
