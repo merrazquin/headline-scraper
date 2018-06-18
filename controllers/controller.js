@@ -7,6 +7,7 @@ const express = require('express'),
     Headline = require('../models/Headline'),
     MAX = 100
 
+var totalResults = 0
 
 router.get('/', (req, res) => {
 
@@ -26,6 +27,8 @@ router.get('/', (req, res) => {
 
             if (!headline) {
                 // new data, perform full scrape
+                totalResults = Math.min(MAX, $('#middleContainer a').length)
+
                 $('#middleContainer a').each((i, element) => {
                     if (i > MAX) {
                         return
@@ -35,6 +38,7 @@ router.get('/', (req, res) => {
                         URL = $(element).attr('href'),
                         imgURL = ''
 
+                    // TODO: only update URL if not found...
                     request(BASE_URL + URL, (err, response, html) => {
                         if (err) {
                             return res.render('error', { error: err.toString() })
@@ -54,12 +58,15 @@ router.get('/', (req, res) => {
                                 if (error) {
                                     return console.error(error)
                                 }
+                                results.push(result)
+
+                                // if all results have been pushed, we can send them to the client
+                                if(results.length == totalResults) {
+                                    res.render('index', {base: BASE_URL, headlines: results})
+                                }
                             })
                     })
-
-                    results.push({ title: title, URL: URL })
                 })
-                res.render('index', { base: BASE_URL, headlines: results })
             } else {
                 // no new data, pull existing items from DB
                 Headline.find({}, null, { sort: '_id' }, (err, headlines) => {
