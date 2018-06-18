@@ -4,11 +4,8 @@ const express = require('express'),
     router = express.Router(),
     mongoose = require('mongoose'),
     BASE_URL = 'https://xkcd.com',
-    Headline = mongoose.model('Headline', mongoose.Schema({
-        title: String,
-        link: String,
-        imgURL: String
-    }))
+    Headline = require('../models/Headline'),
+    MAX = 100
 
 
 router.get('/', (req, res) => {
@@ -22,7 +19,7 @@ router.get('/', (req, res) => {
         let $ = cheerio.load(html),
             results = []
 
-        Headline.findOne({ link: $('#middleContainer a')[0].attribs.href }, (err, headline) => {
+        Headline.findOne({ URL: $('#middleContainer a')[0].attribs.href }, (err, headline) => {
             if (err) {
                 return res.render('error', { error: err })
             }
@@ -30,20 +27,37 @@ router.get('/', (req, res) => {
             if (!headline) {
                 // new data, perform full scrape
                 $('#middleContainer a').each((i, element) => {
+                    if (i > MAX) {
+                        return
+                    }
+
                     let title = $(element).text(),
-                        link = $(element).attr('href')
+                        URL = $(element).attr('href'),
+                        imgURL = ''
 
-                    Headline.findOneAndUpdate(
-                        { link: link }, // link should be unique, so search by that
-                        { $set: { title: title } }, // update the title if necessary
-                        { upsert: true, new: true, setDefaultsOnInsert: true }, // upsert - insert or update depending on existence
-                        (error, result) => {
-                            if (error) {
-                                return console.error(error)
-                            }
-                        })
+                    request(BASE_URL + URL, (err, response, html) => {
+                        if (err) {
+                            return res.render('error', { error: err.toString() })
+                        }
 
-                    results.push({ title: title, link: link })
+                        let $ = cheerio.load(html)
+
+                        if ($('#comic img').length) {
+                            imgURL = 'https:' + $('#comic img')[0].attribs.src
+                        }
+
+                        Headline.findOneAndUpdate(
+                            { URL: URL }, // URL should be unique, so search by that
+                            { $set: { title: title, imgURL: imgURL } }, // update the title if necessary
+                            { upsert: true, new: true, setDefaultsOnInsert: true }, // upsert - insert or update depending on existence
+                            (error, result) => {
+                                if (error) {
+                                    return console.error(error)
+                                }
+                            })
+                    })
+
+                    results.push({ title: title, URL: URL })
                 })
                 res.render('index', { base: BASE_URL, headlines: results })
             } else {
@@ -57,6 +71,22 @@ router.get('/', (req, res) => {
                 })
             }
         })
+    })
+})
+
+router.post('/comment', (req, res) => {
+    Headline.findById(req.body.articleID, (err, article) => {
+        article.addComment(req.body.comment, (err, newComment) => {
+            req.app.render('partials/comment', { _id: newComment._id, comment: newComment.comment, layout: false }, (err, html) => {
+                res.json({ articleID: req.body.articleID, html: html })
+            })
+        })
+    })
+})
+
+router.delete('/comment/:id', (req, res) => {
+    Headline.removeComment(req.params.id, (err, data) => {
+        res.json(req.params.id)
     })
 })
 

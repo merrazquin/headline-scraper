@@ -1,5 +1,34 @@
-<h1>Headline Scraper</h1>
+<h1>XKCD Comments</h1>
 
-{{#each headlines}}
-    <a href="{{../base}}{{link}}" target="_blank">{{title}}</a><br/>
-{{/each}}
+<div class="row grid">
+    {{#each headlines}}
+        <div class="col s12 m4 grid-item">
+            <div class="card" id="{{_id}}">
+                <div class="card-image waves-effect waves-block waves-light">
+                    <img class="activator" src="{{imgURL}}" alt="{{title}}">
+                </div>
+                <div class="card-content">
+                    <span class="card-title activator grey-text text-darken-4">{{title}}<i class="material-icons right">more_vert</i></span>
+                    <p><a href="{{../base}}{{URL}}" target="_blank"><i class="material-icons">link</i></a></p>
+                </div>
+                <div class="card-reveal">
+                    <span class="card-title grey-text text-darken-4">{{title}}<i class="material-icons right">close</i></span>
+                    <div class="comments">
+                        {{#each comments}}
+                            {{>comment this}}
+                        {{/each}}
+                    </div>
+                    <form class="commentForm hide">
+                        <input type="text" data-id="{{_id}}" id="commentText" placeholder="comment (and press ENTER)">
+                    </form>
+                    <div class="stickyButton right-align">
+                        <a class="btn-floating btn-small red waves-effect waves-light addComment">
+                            <i class="small material-icons right">add</i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{!-- <a href="{{../base}}{{URL}}" target="_blank">{{title}}</a><br/> --}}
+    {{/each}}
+</div>
