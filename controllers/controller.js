@@ -39,15 +39,6 @@ router.get('/logout', (req, res) => {
     res.redirect('/')
 })
 
-
-const authCheck = (req, res, next) => {
-    if (!req.user) {
-        res.json({ authFailed: true })
-    } else {
-        next()
-    }
-}
-
 router.get('/', (req, res) => {
     // pull HTML 
     request(BASE_URL + '/archive/', (err, response, html) => {
@@ -122,10 +113,10 @@ router.get('/', (req, res) => {
     })
 })
 
-router.post('/comment', authCheck, (req, res) => {
+router.post('/comment', (req, res) => {
     db.Headline.findById(req.body.articleID, (err, article) => {
-        article.addComment(req.body.comment, req.user._id, (err, newComment) => {
-            req.app.render('partials/comment', { _id: newComment._id, comment: newComment.comment, user: req.user, layout: false }, (err, html) => {
+        article.addComment(req.body.comment, req.user ? req.user._id : undefined, (err, newComment) => {
+            req.app.render('partials/comment', { _id: newComment._id, userId: newComment.userId, comment: newComment.comment, user: req.user, layout: false }, (err, html) => {
                 res.json({ articleID: req.body.articleID, html: html })
             })
         })

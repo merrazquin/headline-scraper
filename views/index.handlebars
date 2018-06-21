@@ -1,6 +1,12 @@
 <h1>XKCD Comments</h1>
 <p><i>Click on a comic to leave a comment</i></p>
-<p>{{#if user}}Logged in as {{user.username}} <a href="/logout">Logout</a>{{else}}<a href="/auth/facebook">Login with Facebook</a>{{/if}}</p>
+<p>
+    {{#if user}}
+        Commenting as <span class="red-text">{{user.username}}</span>. <a href="/logout">Logout</a>
+    {{else}}
+        Commenting as a guest. To protect your comments, <a href="/auth/facebook">login with Facebook.</a>
+    {{/if}}
+</p>
 <div class="row grid">
     {{#each headlines}}
         <div class="col s12 m4 grid-item">

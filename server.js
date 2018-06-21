@@ -38,8 +38,8 @@ app.use(passport.session())
 // use handlebars
 app.engine('handlebars', exphbs({
     defaultLayout: 'main', helpers: {
-        equals: function (arg1, arg2, options) {
-            return (arg1 == arg2) ? options.fn(this) : options.inverse(this)
+        deleteEnabled: function (commentUserId, user, options) {
+            return (commentUserId == "guest" || commentUserId == (user ? user._id : null)) ? options.fn(this) : options.inverse(this)
         }
     }
 }))

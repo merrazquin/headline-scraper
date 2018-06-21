@@ -10,7 +10,8 @@ const
         }, 
         userId: {
             type: String,
-            trim: true
+            trim: true,
+            default: 'guest'
         }
     }),
     headlineSchema = new Schema({
