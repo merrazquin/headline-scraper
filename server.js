@@ -28,7 +28,7 @@ app.use(flash())
 // cookie session setup
 app.use(cookieSession({
     maxAge: 24 * 60 * 60 * 1000,
-    keys: ['testkey']
+    keys: [process.env.SESSION_KEY]
 }))
 
 // auth middleware
