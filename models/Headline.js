@@ -1,4 +1,4 @@
-var
+const
     BASE_URL = 'https://xkcd.com',
     mongoose = require('mongoose'),
     Schema = mongoose.Schema,
@@ -7,6 +7,10 @@ var
             type: String,
             trim: true,
             required: 'Comment is required'
+        }, 
+        userId: {
+            type: String,
+            trim: true
         }
     }),
     headlineSchema = new Schema({
@@ -36,8 +40,8 @@ var
         }
     })
 
-headlineSchema.methods.addComment = function (comment, cb) {
-    let commentObj = this.comments.create({ comment: comment })
+headlineSchema.methods.addComment = function (comment, userId, cb) {
+    let commentObj = this.comments.create({ comment: comment, userId: userId })
     this.comments.push(commentObj)
 
     return this.save((err, result) => {

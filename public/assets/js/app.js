@@ -39,13 +39,17 @@ $(function () {
         var input = $(this).find('input');
         var articleID = input.attr('data-id');
         var comment = input.val();
-
-        $(this).trigger('reset');
+        var form = $(this)
 
         $.post('/comment', { articleID: articleID, comment: comment }, function (data) {
+            if (data.authFailed) {
+                M.toast({ html: 'You must be logged in to comment' }, 4000)
+                return
+            }
             var comments = $('#' + data.articleID + ' .comments'),
                 d = comments.parents('.card-reveal');
 
+            form.trigger('reset');
             comments.append(data.html);
             d.animate({ scrollTop: d.prop("scrollHeight") }, 200)
         });

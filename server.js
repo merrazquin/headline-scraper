@@ -1,5 +1,8 @@
 const express = require('express'),
     bodyParser = require('body-parser'),
+    passport = require('passport'),
+    flash = require('connect-flash'),
+    cookieSession = require('cookie-session'),
     exphbs = require('express-handlebars'),
     mongoose = require('mongoose'),
     routes = require('./controllers/controller.js'),
@@ -21,8 +24,25 @@ app.use(bodyParser.urlencoded({ extended: true }))
 // parse application/json
 app.use(bodyParser.json())
 
+app.use(flash())
+// cookie session setup
+app.use(cookieSession({
+    maxAge: 24 * 60 * 60 * 1000,
+    keys: ['testkey']
+}))
+
+// auth middleware
+app.use(passport.initialize())
+app.use(passport.session())
+
 // use handlebars
-app.engine('handlebars', exphbs({ defaultLayout: 'main' }))
+app.engine('handlebars', exphbs({
+    defaultLayout: 'main', helpers: {
+        equals: function (arg1, arg2, options) {
+            return (arg1 == arg2) ? options.fn(this) : options.inverse(this)
+        }
+    }
+}))
 app.set('view engine', 'handlebars')
 
 // use controller for routing

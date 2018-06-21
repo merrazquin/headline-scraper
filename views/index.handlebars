@@ -1,5 +1,6 @@
 <h1>XKCD Comments</h1>
 <p><i>Click on a comic to leave a comment</i></p>
+<p>{{#if user}}Logged in as {{user.username}} <a href="/logout">Logout</a>{{else}}<a href="/auth/facebook">Login with Facebook</a>{{/if}}</p>
 <div class="row grid">
     {{#each headlines}}
         <div class="col s12 m4 grid-item">
@@ -18,7 +19,7 @@
                     <span class="card-title grey-text text-darken-4">{{title}}<i class="material-icons right">close</i></span>
                     <div class="comments">
                         {{#each comments}}
-                            {{>comment this}}
+                            {{>comment _id=this._id userId=this.userId comment=this.comment user=../../user}}
                         {{/each}}
                     </div>
                     <form class="commentForm {{#if comments.length}}hide{{/if}}">

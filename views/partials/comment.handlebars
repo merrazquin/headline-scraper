@@ -1,1 +1,4 @@
-<p id="{{_id}}"><a class="btn-flat waves-effect waves-red deleteComment center" data-id="{{_id}}"><i class="material-icons">delete</i></a>{{comment}}</p>
+<p id="{{_id}}">
+    {{#equals user._id userId}}<a class="btn-flat waves-effect waves-red deleteComment center" data-id="{{_id}}"><i class="material-icons">delete</i></a>{{/equals}}
+    {{comment}}
+</p>

@@ -1,16 +1,54 @@
+require('dotenv').config()
+
 const express = require('express'),
     cheerio = require('cheerio'),
     request = require('request'),
     router = express.Router(),
     mongoose = require('mongoose'),
     BASE_URL = 'https://xkcd.com',
-    Headline = require('../models/Headline'),
-    MAX = 100
+    db = require('../models'),
+    MAX = 100,
+    passport = require('passport'),
+    FacebookStrategy = require('passport-facebook').Strategy
 
 var totalResults = 0
 
-router.get('/', (req, res) => {
+passport.serializeUser((user, done) => done(null, user._id))
 
+passport.deserializeUser((id, done) => db.User.findById(id, (err, user) => done(err, user)))
+
+passport.use(new FacebookStrategy(
+    {
+        clientID: process.env.FACEBOOK_APP_ID,
+        clientSecret: process.env.FACEBOOK_APP_SECRET,
+        callbackURL: '/auth/facebook/callback'
+    }, (accessToken, refreshToken, profile, done) => {
+        db.User.findOrCreate({ facebookId: profile.id }, { username: profile.displayName }, (err, user) => {
+            if (err) return done(err)
+            done(null, user)
+        })
+    }
+))
+
+router.get('/auth/facebook', passport.authenticate('facebook'))
+
+router.get('/auth/facebook/callback', passport.authenticate('facebook', { successRedirect: '/', failureRedirect: '/', failureFlash: true }))
+
+router.get('/logout', (req, res) => {
+    req.logout()
+    res.redirect('/')
+})
+
+
+const authCheck = (req, res, next) => {
+    if (!req.user) {
+        res.json({ authFailed: true })
+    } else {
+        next()
+    }
+}
+
+router.get('/', (req, res) => {
     // pull HTML 
     request(BASE_URL + '/archive/', (err, response, html) => {
         if (err) {
@@ -20,7 +58,7 @@ router.get('/', (req, res) => {
         let $ = cheerio.load(html),
             results = []
 
-        Headline.findOne({ URL: $('#middleContainer a')[0].attribs.href }, (err, headline) => {
+        db.Headline.findOne({ URL: $('#middleContainer a')[0].attribs.href }, (err, headline) => {
             if (err) {
                 return res.render('error', { error: err })
             }
@@ -39,13 +77,13 @@ router.get('/', (req, res) => {
                         imgURL = '',
                         imgCaption = ''
 
-                    Headline.findOne({ URL: URL }, (err, article) => {
+                    db.Headline.findOne({ URL: URL }, (err, article) => {
                         if (article) {
                             // don't create a new one if it already exists
                             totalResults--
 
                             if (!totalResults) {
-                                return findAll(res)
+                                return findAll(res, req.user)
                             }
                         } else {
                             // otherwise, pull the image URL, and create a new one
@@ -61,14 +99,14 @@ router.get('/', (req, res) => {
                                     imgCaption = $('#comic img')[0].attribs.title
                                 }
 
-                                Headline.create({ URL: URL, title: title, imgURL: imgURL, imgCaption: imgCaption }, (error, result) => {
+                                db.Headline.create({ URL: URL, title: title, imgURL: imgURL, imgCaption: imgCaption }, (error, result) => {
                                     if (error) {
                                         return console.error(error)
                                     }
                                     totalResults--
                                     // if all results have been pushed, we can send them to the client
                                     if (!totalResults) {
-                                        findAll(res)
+                                        findAll(res, req.user)
                                     }
                                 })
                             })
@@ -78,16 +116,16 @@ router.get('/', (req, res) => {
                 })
             } else {
                 // no new data, pull existing items from DB
-                findAll(res)
+                findAll(res, req.user)
             }
         })
     })
 })
 
-router.post('/comment', (req, res) => {
-    Headline.findById(req.body.articleID, (err, article) => {
-        article.addComment(req.body.comment, (err, newComment) => {
-            req.app.render('partials/comment', { _id: newComment._id, comment: newComment.comment, layout: false }, (err, html) => {
+router.post('/comment', authCheck, (req, res) => {
+    db.Headline.findById(req.body.articleID, (err, article) => {
+        article.addComment(req.body.comment, req.user._id, (err, newComment) => {
+            req.app.render('partials/comment', { _id: newComment._id, comment: newComment.comment, user: req.user, layout: false }, (err, html) => {
                 res.json({ articleID: req.body.articleID, html: html })
             })
         })
@@ -95,18 +133,18 @@ router.post('/comment', (req, res) => {
 })
 
 router.delete('/comment/:id', (req, res) => {
-    Headline.removeComment(req.params.id, (err, data) => {
+    db.Headline.removeComment(req.params.id, (err, data) => {
         res.json(req.params.id)
     })
 })
 
-function findAll(res) {
-    Headline.find({}, null, { sort: '_id' }, (err, headlines) => {
+function findAll(res, user) {
+    db.Headline.find({}, null, { sort: '_id' }, (err, headlines) => {
         if (err) {
             return res.render('error', { error: err })
         }
 
-        res.render('index', { base: BASE_URL, headlines: headlines })
+        res.render('index', { user: user, base: BASE_URL, headlines: headlines })
     })
 }
 
