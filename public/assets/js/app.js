@@ -45,6 +45,7 @@ $(function () {
             var comments = $('#' + data.articleID + ' .comments'),
                 d = comments.parents('.card-reveal');
 
+            input.trigger('blur');
             form.trigger('reset');
             comments.append(data.html);
             d.animate({ scrollTop: d.prop("scrollHeight") }, 200)
