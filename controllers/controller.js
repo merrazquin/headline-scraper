@@ -12,6 +12,9 @@ const express = require('express'),
     FacebookStrategy = require('passport-facebook').Strategy
 
 var totalResults = 0
+var guest;
+
+db.User.guest((err, guestObj) => guest = guestObj)
 
 passport.serializeUser((user, done) => done(null, user._id))
 
@@ -115,8 +118,8 @@ router.get('/', (req, res) => {
 
 router.post('/comment', (req, res) => {
     db.Headline.findById(req.body.articleID, (err, article) => {
-        article.addComment(req.body.comment, req.user ? req.user._id : undefined, (err, newComment) => {
-            req.app.render('partials/comment', { _id: newComment._id, userId: newComment.userId, comment: newComment.comment, user: req.user, layout: false }, (err, html) => {
+        article.addComment(req.body.comment, req.user ? req.user._id : guest._id, (err, newComment) => {
+            req.app.render('partials/comment', { _id: newComment._id, commentUser: newComment.user, comment: newComment.comment, guestUser: guest, user: req.user, layout: false }, (err, html) => {
                 res.json({ articleID: req.body.articleID, html: html })
             })
         })
@@ -130,12 +133,11 @@ router.delete('/comment/:id', (req, res) => {
 })
 
 function findAll(res, user) {
-    db.Headline.find({}, null, { sort: '_id' }, (err, headlines) => {
+    db.Headline.find({}, null, { sort: '_id' }).populate('comments.user').exec((err, headlines) => {
         if (err) {
             return res.render('error', { error: err })
         }
-
-        res.render('index', { user: user, base: BASE_URL, headlines: headlines })
+        res.render('index', { user: user, guestUser: guest, base: BASE_URL, headlines: headlines })
     })
 }
 

@@ -1,4 +1,4 @@
 <p id="{{_id}}">
-    {{#deleteEnabled userId user}}<a class="btn-flat waves-effect waves-red deleteComment center" data-id="{{_id}}"><i class="material-icons">delete</i></a>{{/deleteEnabled}}
-    {{comment}}
+    {{#deleteEnabled commentUser guestUser user}}<a class="btn-flat waves-effect waves-red deleteComment center" data-id="{{_id}}"><i class="material-icons">delete</i></a>{{/deleteEnabled}}
+    {{comment}} - {{commentUser.username}}
 </p>

@@ -7,11 +7,10 @@ const
             type: String,
             trim: true,
             required: 'Comment is required'
-        }, 
-        userId: {
-            type: String,
-            trim: true,
-            default: 'guest'
+        },
+        user: {
+            type: Schema.Types.ObjectId,
+            ref: 'User'
         }
     }),
     headlineSchema = new Schema({
@@ -42,17 +41,19 @@ const
     })
 
 headlineSchema.methods.addComment = function (comment, userId, cb) {
-    let commentObj = this.comments.create({ comment: comment, userId: userId })
-    this.comments.push(commentObj)
+    let commentObj = this.comments.create({ comment: comment, user: userId })
+    let newLen = this.comments.push(commentObj)
 
     return this.save((err, result) => {
-        cb(err, commentObj)
+        this.populate(`comments.${newLen - 1}.user`, (err, popped) => {
+            cb(err, popped.comments[newLen - 1])
+        })
     })
 }
 
 headlineSchema.statics.removeComment = function (commentId, cb) {
     this.findOne({ 'comments._id': commentId }, (err, result) => {
-        if(result){
+        if (result) {
             result.comments.pull(commentId)
             result.save(cb)
         }

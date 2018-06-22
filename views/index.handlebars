@@ -25,7 +25,7 @@
                     <span class="card-title grey-text text-darken-4">{{title}}<i class="material-icons right">close</i></span>
                     <div class="comments">
                         {{#each comments}}
-                            {{>comment _id=this._id userId=this.userId comment=this.comment user=../../user}}
+                            {{>comment _id=this._id guestUser=../../guestUser commentUser=this.user comment=this.comment user=../../user}}
                         {{/each}}
                     </div>
                     <form class="commentForm {{#if comments.length}}hide{{/if}}">
