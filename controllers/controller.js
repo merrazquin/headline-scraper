@@ -24,7 +24,7 @@ passport.use(new FacebookStrategy(
     {
         clientID: process.env.FACEBOOK_APP_ID,
         clientSecret: process.env.FACEBOOK_APP_SECRET,
-        callbackURL: '/auth/facebook/callback'
+        callbackURL: process.env.FACEBOOK_CALLBACK_URL,
     }, (accessToken, refreshToken, profile, done) => {
         db.User.findOrCreate({ facebookId: profile.id }, { username: profile.displayName }, (err, user) => {
             if (err) return done(err)
