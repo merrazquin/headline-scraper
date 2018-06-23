@@ -20,11 +20,14 @@ $(function () {
 
     $(document).on('click', '.deleteComment', function (event) {
         var id = $(this).attr('data-id'),
-            obj = $(this).parents('#' + id);
+        comments = $(this).parents('.comments')
 
         $.ajax({
             url: '/comment/' + id, type: 'DELETE', success: function (result) {
-                $('#' + result).fadeOut()
+                $('#' + result).fadeOut(function() {
+                    this.remove()
+                    comments.parents('.card').find('.badge').text(comments.children().length)
+                })
             }
         });
     });
@@ -48,6 +51,7 @@ $(function () {
             input.trigger('blur');
             form.trigger('reset');
             comments.append(data.html);
+            comments.parents('.card').find('.badge').text(comments.children().length)
             d.animate({ scrollTop: d.prop("scrollHeight") }, 200)
         });
     });

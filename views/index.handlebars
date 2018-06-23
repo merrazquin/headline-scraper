@@ -16,13 +16,16 @@
                 </div>
                 <div class="card-content">
                     <span class="card-title activator grey-text text-darken-4 flow-text">{{title}}<i class="material-icons right">more_vert</i></span>
-                    <p><a href="{{../base}}{{URL}}" target="_blank" title="view comic"><i class="material-icons">link</i></a></p>
+                    <p>
+                        <a href="{{../base}}{{URL}}" target="_blank" title="view comic"><i class="material-icons">link</i></a>
+                        <span class="new badge activator" data-badge-caption="comment(s)">{{comments.length}}</span>
+                    </p>
                     <p>
                         <i>{{imgCaption}}</i>
                     </p>
                 </div>
                 <div class="card-reveal">
-                    <span class="card-title grey-text text-darken-4">{{title}}<i class="material-icons right">close</i></span>
+                    <span class="card-title grey-text text-darken-4 flow-text">{{title}}<i class="material-icons right">close</i></span>
                     <div class="comments">
                         {{#each comments}}
                             {{>comment _id=this._id guestUser=../../guestUser commentUser=this.user comment=this.comment user=../../user}}
