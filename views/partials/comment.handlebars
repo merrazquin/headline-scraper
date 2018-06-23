@@ -1,4 +1,6 @@
 <p id="{{_id}}">
-    {{#deleteEnabled commentUser guestUser user}}<a class="btn-flat waves-effect waves-red deleteComment center" data-id="{{_id}}"><i class="material-icons">delete</i></a>{{/deleteEnabled}}
+    {{#deleteEnabled commentUser guestUser user}}<a class="btn-flat waves-effect waves-red deleteComment center" data-id="{{_id}}"><i class="material-icons">delete</i></a>
+    {{else}}<a class="btn-flat deleteComment disabled" data-title="Protected by {{commentUser.username}}" title="Protected by {{commentUser.username}}"><i class="material-icons">delete</i></a>
+    {{/deleteEnabled}}
     {{comment}} - {{commentUser.username}}
 </p>

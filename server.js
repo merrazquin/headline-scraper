@@ -1,3 +1,5 @@
+require('dotenv').config()
+
 const express = require('express'),
     bodyParser = require('body-parser'),
     passport = require('passport'),
@@ -5,7 +7,6 @@ const express = require('express'),
     cookieSession = require('cookie-session'),
     exphbs = require('express-handlebars'),
     mongoose = require('mongoose'),
-    routes = require('./controllers/controller.js'),
     PORT = process.env.PORT || 3000,
     app = express(),
     // If deployed, use the deployed database. Otherwise use the local mongoHeadlines database
@@ -24,14 +25,13 @@ app.use(bodyParser.urlencoded({ extended: true }))
 // parse application/json
 app.use(bodyParser.json())
 
+// auth middleware
 app.use(flash())
 // cookie session setup
 app.use(cookieSession({
     maxAge: 24 * 60 * 60 * 1000,
     keys: [process.env.SESSION_KEY]
 }))
-
-// auth middleware
 app.use(passport.initialize())
 app.use(passport.session())
 
@@ -48,9 +48,8 @@ app.engine('handlebars', exphbs({
 }))
 app.set('view engine', 'handlebars')
 
-// use controller for routing
-app.use(routes)
-
+// use controllers for routing
+require('./controllers')(app)
 
 let db = mongoose.connection
 db.on('error', console.error.bind(console, 'connection error'))
