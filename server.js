@@ -40,6 +40,9 @@ app.engine('handlebars', exphbs({
     defaultLayout: 'main', helpers: {
         deleteEnabled: function (commentUser, guestUser, user, options) {
             return (commentUser._id.toString() === guestUser._id.toString() || commentUser._id.toString() === (user ? user._id.toString() : null)) ? options.fn(this) : options.inverse(this)
+        },
+        plural: function(number, single, plural) {
+            return number === 1 ? single : plural
         }
     }
 }))

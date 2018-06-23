@@ -4,6 +4,11 @@ $grid.imagesLoaded().progress(function () {
     $grid.masonry('layout');
 });
 
+function updateCommentCount(badge, commentCount) {
+    badge.text(commentCount);
+    badge.attr('data-badge-caption', commentCount == 1 ? 'comment' : 'comments');
+}
+
 $(function () {
     $(document).on('click', '.addComment', function (event) {
         var d = $(this).parents('.card-reveal'),
@@ -26,7 +31,7 @@ $(function () {
             url: '/comment/' + id, type: 'DELETE', success: function (result) {
                 $('#' + result).fadeOut(function() {
                     this.remove()
-                    comments.parents('.card').find('.badge').text(comments.children().length)
+                    updateCommentCount(comments.parents('.card').find('.badge'), comments.children().length)
                 })
             }
         });
@@ -51,7 +56,7 @@ $(function () {
             input.trigger('blur');
             form.trigger('reset');
             comments.append(data.html);
-            comments.parents('.card').find('.badge').text(comments.children().length)
+            updateCommentCount(comments.parents('.card').find('.badge'), comments.children().length)
             d.animate({ scrollTop: d.prop("scrollHeight") }, 200)
         });
     });

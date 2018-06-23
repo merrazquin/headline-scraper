@@ -1,10 +1,10 @@
-<h1>XKCD Comments</h1>
+<h1><a href="https://xkcd.com/" target="_blank">XKCD</a> Comments</h1>
 <p><i>Click on a comic to leave a comment</i></p>
 <p>
     {{#if user}}
-        Commenting as <span class="red-text">{{user.username}}</span>. <a href="/logout">Logout</a>
+        Commenting as <span class="red-text">{{user.username}}</span>.<br/><a href="/logout">Logout</a>
     {{else}}
-        Commenting as a guest. To protect your comments, <a href="/auth/facebook">login with Facebook.</a>
+        Commenting as a guest.<br/>To protect your comments, <a href="/auth/facebook">log in with Facebook.</a>
     {{/if}}
 </p>
 <div class="row grid">
@@ -18,7 +18,7 @@
                     <span class="card-title activator grey-text text-darken-4 flow-text">{{title}}<i class="material-icons right">more_vert</i></span>
                     <p>
                         <a href="{{../base}}{{URL}}" target="_blank" title="view comic"><i class="material-icons">link</i></a>
-                        <span class="new badge activator" data-badge-caption="comment(s)">{{comments.length}}</span>
+                        <span class="new badge activator" data-badge-caption="{{plural comments.length "comment" "comments"}}">{{comments.length}}</span>
                     </p>
                     <p>
                         <i>{{imgCaption}}</i>
